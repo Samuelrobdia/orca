@@ -354,6 +354,24 @@ describe('useSourceControlBranchCompare scheduler', () => {
   })
 })
 
+it('compares once when a newly visible branch first loads its status and upstream', async () => {
+  const root = await mount({ isBranchVisible: true })
+  await flush()
+  expect(mocks.getRuntimeGitBranchCompare).toHaveBeenCalledTimes(1)
+
+  await act(async () => {
+    root.render(
+      <Probe
+        isBranchVisible
+        statusHead="head-1"
+        remoteStatus={{ hasUpstream: true, upstreamName: 'origin/feature', ahead: 1, behind: 0 }}
+      />
+    )
+  })
+  await flush()
+  expect(mocks.getRuntimeGitBranchCompare).toHaveBeenCalledTimes(1)
+})
+
 describe('branch comparison visibility recovery', () => {
   it.each(['loading', 'missing', 'base-change', 'error'])(
     'bypasses slow polling backoff for %s data',
